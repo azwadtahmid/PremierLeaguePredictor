@@ -25,9 +25,18 @@ STATS = ["goals_for", "goals_against", "shots", "shots_on_target", "points"]
 
 
 def load_matches(path=MATCHES):
-    """Read matches.csv, turn Date into real dates and sort by time."""
+    """Read matches.csv and prepare it."""
     # .copy() packs the ~195 columns together in memory (avoids a PerformanceWarning).
-    matches = pd.read_csv(path, low_memory=False).copy()
+    return prepare(pd.read_csv(path, low_memory=False).copy())
+
+
+def prepare(matches):
+    """Turn Date into real dates, sort by time and number the matches.
+
+    Separate from load_matches so src/predict.py can add upcoming fixtures
+    first and then build their features with exactly the same code.
+    """
+    matches = matches.copy()
     # dayfirst: 05/08 is 5 August.  format="mixed": 2016/17 uses 2-digit years.
     matches["Date"] = pd.to_datetime(matches["Date"], dayfirst=True, format="mixed")
     matches = matches.sort_values("Date", kind="stable").reset_index(drop=True)
