@@ -222,7 +222,7 @@ def main():
     metrics, predictions = score_all(train, test, models, load_matches())
 
     RESULTS.mkdir(exist_ok=True)
-    metrics.to_csv(RESULTS / "metrics.csv", index=False, float_format="%.4f")
+    metrics.to_csv(RESULTS / "metrics.csv", index=False, float_format="%.6f")
     print(metrics.to_string(index=False, float_format=lambda v: f"{v:.3f}", na_rep=""), "\n")
 
     candidates = metrics[metrics["model"].isin([*models, GOALS_MODEL])]
