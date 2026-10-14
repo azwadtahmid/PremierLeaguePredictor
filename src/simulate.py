@@ -1,6 +1,7 @@
-"""Simulate the rest of the 2026/27 season 10,000 times.
+"""Simulate the rest of the 2026/27 season 10,000 times, after every matchweek.
 
-1. Build the current table from the matches already played.
+For each completed matchweek (one that isn't in the history yet):
+1. Build the table from the matches played up to the end of that matchweek.
 2. Work out the remaining fixtures: every team plays every other team once at
    home and once away, so it's all 380 pairings minus the ones already played.
 3. Fit the goals model on everything played so far, and get expected goals for
@@ -10,7 +11,9 @@
    points, then goal difference, then goals scored. Do this 10,000 times.
 5. Count how often each team finishes in each position.
 
-Writes results/season_simulation.csv and results/season_simulation.png.
+Each matchweek's predicted table is appended to results/table_history.csv,
+so the website can show how it changes week to week. The latest one is also
+saved as results/season_simulation.csv and results/season_simulation.png.
 Run after src/download.py:  python src/simulate.py
 """
 
@@ -23,13 +26,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from features import load_matches
+from features import MATCHES, load_matches
 from goals import GoalsModel
+from schedule import SEASON, completed_rounds, load_fixtures
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RESULTS = PROJECT_ROOT / "results"
+HISTORY = RESULTS / "table_history.csv"
 
-SEASON = "2026/27"
 SIMULATIONS = 10_000
 INK, MUTED = "#0b0b0b", "#52514e"
 
@@ -104,7 +108,7 @@ def summarise(table, positions, pts, teams):
     return summary, position_share
 
 
-def plot(position_share, summary, played_matches, path):
+def plot(position_share, summary, round_number, path):
     """Heatmap: each team's chance of finishing in each position."""
     fig, ax = plt.subplots(figsize=(12, 8))
     ax.imshow(position_share.to_numpy(), cmap="Blues", vmin=0, vmax=max(0.5, position_share.max().max()),
@@ -125,39 +129,68 @@ def plot(position_share, summary, played_matches, path):
     ax.tick_params(colors=MUTED, length=0)
     for spine in ax.spines.values():
         spine.set_visible(False)
-    ax.set_title(f"Predicted {SEASON} final table: chance of each position "
-                 f"({SIMULATIONS:,} simulations after {played_matches} matches)",
+    ax.set_title(f"Predicted {SEASON} final table after matchweek {round_number}: "
+                 f"chance of each position ({SIMULATIONS:,} simulations)",
                  loc="left", color=INK, pad=32)
     fig.tight_layout()
     fig.savefig(path, dpi=150)
     plt.close(fig)
 
 
-def main():
+def predict_table(matches, played, teams):
+    """Simulate the rest of the season from the `played` matches."""
+    table = current_table(played, teams)
+    fixtures = remaining_fixtures(played, teams)
+    model = GoalsModel().fit(matches, as_of=played["Date"].max() + pd.Timedelta(days=1),
+                             teams=teams)
+    home_xg, away_xg = model.expected_goals(fixtures["HomeTeam"], fixtures["AwayTeam"])
+    positions, pts = simulate(table, fixtures, home_xg, away_xg, teams)
+    return summarise(table, positions, pts, teams)
+
+
+def main(now=None):
+    now = pd.Timestamp.now(tz="UTC") if now is None else now
     matches = load_matches()
-    played = matches[matches["Season"] == SEASON]
-    teams = sorted(set(played["HomeTeam"]) | set(played["AwayTeam"]))
+    season = matches[matches["Season"] == SEASON]
+    teams = sorted(set(season["HomeTeam"]) | set(season["AwayTeam"]))
     if len(teams) != 20:
         raise SystemExit(f"Expected 20 teams in {SEASON}, found {len(teams)}: {teams}")
 
-    table = current_table(played, teams)
-    fixtures = remaining_fixtures(played, teams)
-    model = GoalsModel().fit(matches, as_of=played["Date"].max() + pd.Timedelta(days=1))
-    home_xg, away_xg = model.expected_goals(fixtures["HomeTeam"], fixtures["AwayTeam"])
-
-    positions, pts = simulate(table, fixtures, home_xg, away_xg, teams)
-    summary, position_share = summarise(table, positions, pts, teams)
+    fixtures = load_fixtures(pd.read_csv(MATCHES, low_memory=False), now)
+    history = pd.read_csv(HISTORY) if HISTORY.exists() else pd.DataFrame(columns=["round"])
+    new_rounds = [r for r in completed_rounds(fixtures) if r not in set(history["round"])]
+    if not new_rounds:
+        print("No newly completed matchweek; predicted table unchanged.")
+        return
 
     RESULTS.mkdir(exist_ok=True)
+    for round_number in new_rounds:
+        # The table as it stood at the end of this matchweek.
+        in_round = fixtures[(fixtures["round"] == round_number) & (fixtures["status"] == "played")]
+        cutoff = pd.to_datetime(in_round["Date"], format="%d/%m/%Y").max()
+        played = season[season["Date"] <= cutoff]
+        summary, position_share = predict_table(matches, played, teams)
+
+        snapshot = summary.assign(round=round_number,
+                                  predicted_position=summary.index).reset_index(drop=True)
+        history = pd.concat([history, snapshot], ignore_index=True)
+        print(f"Matchweek {round_number}: {len(played)} played; "
+              f"favourite {summary.iloc[0]['team']} ({summary.iloc[0]['champion']:.1%})")
+
+    history = history[["round", "predicted_position", *summary.columns]].astype(
+        {"round": int, "predicted_position": int, "played": int, "points_now": int})
+    history.to_csv(HISTORY, index=False, float_format="%.4f")
+
+    # Latest matchweek: also as its own CSV and chart (used in the README).
     summary.to_csv(RESULTS / "season_simulation.csv", index_label="predicted_position",
                    float_format="%.4f")
-    plot(position_share, summary, len(played), RESULTS / "season_simulation.png")
+    plot(position_share, summary, new_rounds[-1], RESULTS / "season_simulation.png")
 
     shown = summary.copy()
     for column in ("champion", "top_4", "relegated"):
         shown[column] = shown[column].map("{:.1%}".format)
-    print(f"{SEASON}: {len(played)} played, {len(fixtures)} remaining, "
-          f"{SIMULATIONS:,} simulations\n")
+    print(f"\nPredicted table after matchweek {new_rounds[-1]} "
+          f"({SIMULATIONS:,} simulations):\n")
     print(shown.to_string())
 
 
