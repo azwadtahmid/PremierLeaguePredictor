@@ -3,10 +3,12 @@
 1. Split by time: train on 2015/16-2024/25, test on 2025/26.
 2. Score two baselines on the test season: "always home win" and the
    Bet365 favourite.
-3. Train a random forest and XGBoost on the same split.
+3. Train a random forest and XGBoost on the same split (the "form models"),
+   and test the goals model from src/goals.py on the same matches.
 4. Report accuracy, log loss and a confusion matrix; save charts to results/.
-5. Refit the best model (lowest test log loss) on every complete season and
-   save it to models/model.joblib for src/predict.py.
+5. Refit the better form model (lowest test log loss) on every complete season
+   and save it to models/model.joblib for src/predict.py. The goals model
+   needs no saved file: predict.py refits it on the latest results each run.
 
 Reads data/features.csv (from src/features.py).
 Run from anywhere:  python src/train.py
@@ -26,7 +28,8 @@ from sklearn.inspection import permutation_importance
 from sklearn.metrics import accuracy_score, confusion_matrix, log_loss
 from xgboost import XGBClassifier
 
-from features import STATS
+import goals
+from features import STATS, load_matches
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 FEATURES_CSV = PROJECT_ROOT / "data" / "features.csv"
@@ -43,6 +46,7 @@ CLASSES = ["A", "D", "H"]
 CLASS_CODE = {label: code for code, label in enumerate(CLASSES)}  # XGBoost needs 0/1/2
 DISPLAY_ORDER = ["H", "D", "A"]
 NAMES = {"H": "Home win", "D": "Draw", "A": "Away win"}
+GOALS_MODEL = "Goals model (Poisson)"
 
 BLUE, GREY, INK, MUTED, GRID = "#2a78d6", "#a3a29c", "#0b0b0b", "#52514e", "#e5e4e0"
 
@@ -95,7 +99,7 @@ def evaluate(name, actual, probabilities, predicted=None):
     }, predicted
 
 
-def score_all(train, test, models):
+def score_all(train, test, models, matches):
     """Baselines and models on one test set. Returns metrics and predictions."""
     y_test = test["FTR"]
     rows, predictions = [], {}
@@ -116,6 +120,13 @@ def score_all(train, test, models):
         metrics, predictions[name] = evaluate(name, y_test, model.predict_proba(test[FEATURES]))
         rows.append(metrics)
 
+    # The goals model refits before each matchday, using only matches already played.
+    probabilities, scorelines = goals.evaluate(matches, test)
+    metrics, predictions[GOALS_MODEL] = evaluate(GOALS_MODEL, y_test, probabilities)
+    metrics.update(exact_score=scorelines["exact_score"],
+                   score_in_top3=scorelines["score_in_top3"])
+    rows.append(metrics)
+
     return pd.DataFrame(rows), predictions
 
 
@@ -128,7 +139,7 @@ def style(ax):
 
 def plot_comparison(metrics, path):
     """Accuracy and log loss side by side: baselines in grey, models in blue."""
-    fig, (left, right) = plt.subplots(1, 2, figsize=(11, 3.8))
+    fig, (left, right) = plt.subplots(1, 2, figsize=(11, 4.3))
     labels = metrics["model"][::-1]
     colours = [GREY if "home" in m or "Bet365" in m else BLUE for m in labels]
 
@@ -141,7 +152,7 @@ def plot_comparison(metrics, path):
             ax.annotate(fmt.format(value), (value, y), xytext=(4, 0),
                         textcoords="offset points", va="center", color=INK, fontsize=9)
         ax.set_title(title, loc="left", color=INK)
-        ax.set_xlim(0, values.max() * 1.18)
+        ax.set_xlim(0, values.max() * 1.2)
         ax.xaxis.set_visible(False)
         style(ax)
     right.tick_params(left=False, labelleft=False)
@@ -155,7 +166,7 @@ def plot_comparison(metrics, path):
 
 def plot_confusion(name, actual, predicted, path):
     matrix = confusion_matrix(actual, predicted, labels=DISPLAY_ORDER)
-    fig, ax = plt.subplots(figsize=(5, 4.3))
+    fig, ax = plt.subplots(figsize=(6, 4.6))
     ax.imshow(matrix, cmap="Blues", vmin=0)
     for i in range(3):
         for j in range(3):
@@ -204,27 +215,31 @@ def main():
     print(f"Train: {len(train)} matches ({train['Season'].min()} to {train['Season'].max()})")
     print(f"Test:  {len(test)} matches ({TEST_SEASON})\n")
 
-    # Steps 8-10: baselines and both models on the same test matches.
+    # Steps 8-10: baselines and all models on the same test matches.
     models = make_models()
     for model in models.values():
         fit(model, train[FEATURES], train["FTR"])
-    metrics, predictions = score_all(train, test, models)
+    metrics, predictions = score_all(train, test, models, load_matches())
 
     RESULTS.mkdir(exist_ok=True)
     metrics.to_csv(RESULTS / "metrics.csv", index=False, float_format="%.4f")
-    print(metrics.to_string(index=False, float_format=lambda v: f"{v:.3f}"), "\n")
+    print(metrics.to_string(index=False, float_format=lambda v: f"{v:.3f}", na_rep=""), "\n")
 
+    candidates = metrics[metrics["model"].isin([*models, GOALS_MODEL])]
+    best_overall = candidates.sort_values("log_loss").iloc[0]["model"]
     best = metrics[metrics["model"].isin(models)].sort_values("log_loss").iloc[0]["model"]
-    print(f"Best model by test log loss: {best}\n")
+    print(f"Best model by test log loss: {best_overall}")
+    print(f"Best form model: {best}\n")
 
     # Step 11: charts.
     plot_comparison(metrics, RESULTS / "model_comparison.png")
-    plot_confusion(best, test["FTR"], predictions[best], RESULTS / "confusion_matrix.png")
+    plot_confusion(best_overall, test["FTR"], predictions[best_overall],
+                   RESULTS / "confusion_matrix.png")
     importance = plot_importance(best, models[best], test, RESULTS / "feature_importance.png")
     print("Feature importance (increase in log loss when shuffled):")
     print(importance.sort_values(ascending=False).round(4).to_string(), "\n")
 
-    # Step 12: refit the best model on every complete season (2015/16-2025/26)
+    # Step 12: refit the best form model on every complete season (2015/16-2025/26)
     # and save it. 2026/27 is left out so it stays unseen for live predictions.
     complete = features[features["Season"] < LIVE_SEASON]
     final = fit(make_models()[best], complete[FEATURES], complete["FTR"])

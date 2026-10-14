@@ -1,5 +1,6 @@
-model,accuracy,log_loss,predicted_H,predicted_D,predicted_A
-Always home win,0.4208,1.0858,366,0,0
-Bet365 favourite,0.4891,1.0235,233,0,133
-Random forest,0.4508,1.0639,256,0,110
-XGBoost,0.4536,1.0661,246,0,120
+model,accuracy,log_loss,predicted_H,predicted_D,predicted_A,exact_score,score_in_top3
+Always home win,0.4208,1.0858,366,0,0,,
+Bet365 favourite,0.4891,1.0235,233,0,133,,
+Random forest,0.4508,1.0639,256,0,110,,
+XGBoost,0.4536,1.0661,246,0,120,,
+Goals model (Poisson),0.4727,1.0285,223,0,143,0.0929,0.2842
