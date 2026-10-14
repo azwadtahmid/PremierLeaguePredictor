@@ -5,12 +5,12 @@
 __pycache__/
 .ipynb_checkpoints/
 
-# Regenerable outputs: re-run src/download.py and src/train.py
+# Downloaded data: re-run src/download.py
 data/
-models/
 
-# Editor settings (machine-specific paths)
+# Editor and assistant settings (machine-specific)
 .vscode/
+.claude/
 
 # Local-only notes and AI instructions
 .vibe-wise/
