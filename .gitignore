@@ -1,0 +1,17 @@
+# Virtual environment (built for this machine; recreate with requirements.txt)
+.venv/
+
+# Python and Jupyter auto-generated files
+__pycache__/
+.ipynb_checkpoints/
+
+# Regenerable outputs: re-run src/download.py and src/train.py
+data/
+models/
+
+# Editor settings (machine-specific paths)
+.vscode/
+
+# Local-only notes and AI instructions
+.vibe-wise/
+CLAUDE.md
