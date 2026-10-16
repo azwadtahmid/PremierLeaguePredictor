@@ -1,0 +1,6 @@
+locked_at,round,kickoff,HomeTeam,AwayTeam,prob_H,prob_D,prob_A,prediction,predicted_score,likely_scores,home_xg,away_xg,form_prediction,actual,actual_score,correct_result,correct_score,points,bookmaker_pick
+2026-10-16T11:10Z,7,2026-10-17T11:30Z,Everton,Chelsea,0.396,0.248,0.356,H,2-1,"1-1 12%, 2-1 9%, 1-0 8%",1.49,1.4,H,,,,,,
+2026-10-16T11:10Z,7,2026-10-17T14:00Z,Brentford,Liverpool,0.435,0.242,0.322,H,2-1,"1-1 11%, 2-1 9%, 1-0 8%",1.61,1.36,H,,,,,,
+2026-10-16T11:10Z,7,2026-10-17T14:00Z,Fulham,Hull,0.353,0.289,0.357,A,0-1,"1-1 13%, 0-1 12%, 1-0 12%",1.11,1.12,H,,,,,,
+2026-10-16T11:10Z,7,2026-10-17T14:00Z,Man City,Ipswich,0.852,0.096,0.052,H,3-0,"3-0 10%, 2-0 9%, 4-0 8%",3.32,0.77,H,,,,,,
+2026-10-16T11:10Z,7,2026-10-17T16:30Z,Newcastle,Aston Villa,0.43,0.227,0.344,H,2-1,"1-1 10%, 2-1 9%, 1-2 8%",1.78,1.57,A,,,,,,
