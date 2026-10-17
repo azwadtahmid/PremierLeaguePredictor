@@ -103,6 +103,20 @@ A [GitHub Actions workflow](.github/workflows/update.yml) runs every morning at 
 
 **Scoring:** 3 points for an exact score, 1 for the right result. Matchweeks 1 to 6 were played before tracking began, so the website shows **backtest** predictions for them, made using only results from before each match, and labels them as such.
 
+### Website
+
+A static site in the Premier League palette (purple `#38003C` and white, with green, pink and cyan accents), built with React and Vite from [`web/`](web/) into `docs/`.
+
+The animations are [Remotion](https://www.remotion.dev/) compositions played live in the browser with `@remotion/player`. Each one is driven by the day's `data.json`, so it updates without rendering any video:
+
+- a hero reel that cycles through the next matchweek's predicted scores
+- title race and relegation battle charts that draw themselves when scrolled into view
+- the model's track record racing Bet365 and "always home"
+
+Scroll reveals, count-ups and transitions are plain CSS and JavaScript. Everything respects `prefers-reduced-motion`: animations are switched off and every chart shows its final frame.
+
+The built site is committed, so the daily workflow only has to replace `docs/data.json`. The page reads that file when it loads.
+
 ### Evaluation
 
 - **Split by time**, never randomly: train 2015/16 to 2024/25, test 2025/26. A random split would let a model learn from matches played after the ones it is tested on.
@@ -132,6 +146,17 @@ python src/site.py        # website data -> docs/data.json
 
 To view the site locally: `python -m http.server --directory docs`, then open http://localhost:8000.
 
+To change the website itself (needs Node.js 20+):
+
+```bash
+cd web
+npm install
+npm run dev       # live preview with the real docs/data.json
+npm run build     # type-checks, then writes index.html and assets/ into docs/
+```
+
+The build never touches `docs/data.json`.
+
 On macOS, if XGBoost fails with a `libomp` error, run `brew install libomp`.
 
 ## Project structure
@@ -139,7 +164,8 @@ On macOS, if XGBoost fails with a `libomp` error, run `brew install libomp`.
 ```
 .github/workflows/update.yml  daily automatic update
 data/                         downloaded data (not in the repo; rebuilt by download.py)
-docs/                         the website (GitHub Pages): index.html, app.js, style.css, data.json
+docs/                         the built website (GitHub Pages) and its daily data.json
+web/                          website source: React + Remotion Player (builds into docs/)
 models/model.joblib           trained random forest (form model)
 models/goals_model.json       goals model team ratings, refreshed daily
 notebooks/01_explore.ipynb    data quality checks and result shares
