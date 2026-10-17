@@ -117,6 +117,8 @@ Scroll reveals, count-ups and transitions are plain CSS and JavaScript. Everythi
 
 The built site is committed, so the daily workflow only has to replace `docs/data.json`. The page reads that file when it loads.
 
+The link preview shown on LinkedIn and other sites is `docs/og-image.png`, a 1200×627 screenshot of [`web/og/card.html`](web/og/card.html). It deliberately shows no scores, because sites cache preview images for a long time.
+
 ### Evaluation
 
 - **Split by time**, never randomly: train 2015/16 to 2024/25, test 2025/26. A random split would let a model learn from matches played after the ones it is tested on.

@@ -1,0 +1,51 @@
+<!doctype html>
+<!--
+  Source for docs/og-image.png, the link preview shown by LinkedIn and others.
+  Rendered at exactly 1200x627. Keep it evergreen: no scores or percentages,
+  because sites cache the preview image for a long time.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800&family=Outfit:wght@500;600;700&display=block" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 627px; }
+  body {
+    position: relative; overflow: hidden; color: #fff; font-family: Outfit, sans-serif;
+    background: radial-gradient(ellipse at 85% 0%, #4c1452 0%, #38003c 55%, #24002a 100%);
+  }
+  .stripes { position: absolute; right: -60px; top: -260px; height: 1150px; display: flex; gap: 18px; rotate: 18deg; }
+  .stripes i { width: 92px; }
+  .stripes i:nth-child(1) { background: #04f5ff; }
+  .stripes i:nth-child(2) { background: #e90052; }
+  .stripes i:nth-child(3) { background: #ffffff; }
+  .stripes i:nth-child(4) { background: #00ff85; }
+  .content { position: absolute; left: 72px; top: 58px; bottom: 50px; width: 820px; display: flex; flex-direction: column; }
+  .season { font-weight: 600; font-size: 24px; letter-spacing: 0.18em; color: #00ff85; }
+  h1 { font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 112px; line-height: 0.9; text-transform: uppercase; margin-top: 12px; white-space: nowrap; }
+  h1 span { color: #00ff85; }
+  .points { list-style: none; padding: 0; margin-top: 28px; display: grid; gap: 8px; font-size: 26px; font-weight: 500; color: rgba(255,255,255,0.88); }
+  .points li { display: flex; align-items: center; gap: 14px; }
+  .points li::before { content: ""; width: 12px; height: 12px; border-radius: 3px; background: var(--c); flex: none; }
+  .foot { margin-top: auto; display: flex; align-items: center; gap: 12px; font-size: 21px; font-weight: 600; color: rgba(255,255,255,0.72); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; background: #00ff85; }
+  .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 10px; background: linear-gradient(90deg, #04f5ff 0 25%, #e90052 25% 50%, #fff 50% 75%, #00ff85 75%); }
+</style>
+</head>
+<body>
+  <div class="stripes"><i></i><i></i><i></i><i></i></div>
+  <div class="content">
+    <p class="season">2026/27 SEASON</p>
+    <h1>Premier League<br><span>Predictor</span></h1>
+    <ul class="points">
+      <li style="--c:#00ff85">Predicted scorelines for every fixture</li>
+      <li style="--c:#04f5ff">A predicted final table, updated weekly</li>
+      <li style="--c:#e90052">An honest track record against Bet365</li>
+    </ul>
+    <p class="foot"><span class="dot"></span>Live now · updated every morning</p>
+  </div>
+  <div class="bar"></div>
+</body>
+</html>
