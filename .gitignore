@@ -15,3 +15,6 @@ data/
 # Local-only notes and AI instructions
 .vibe-wise/
 CLAUDE.md
+
+# Frontend dependencies (rebuilt with npm install in web/)
+node_modules/

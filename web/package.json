@@ -1,0 +1,27 @@
+{
+  "name": "pl-predictor-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Website for the Premier League Predictor. Builds into ../docs for GitHub Pages.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@remotion/google-fonts": "4.0.536",
+    "@remotion/player": "4.0.536",
+    "@remotion/transitions": "4.0.536",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remotion": "4.0.536"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "typescript": "7.0.2",
+    "vite": "8.3.4"
+  }
+}
