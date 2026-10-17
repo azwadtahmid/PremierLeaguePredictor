@@ -1,0 +1,9 @@
+# How GitHub's language bar (Linguist) counts this repo.
+
+# The exploration notebook is Python; by default GitHub lists notebooks as a
+# separate "Jupyter Notebook" language.
+*.ipynb linguist-language=Python
+
+# docs/ is the built website and the bot's daily data.json, not hand-written
+# code. Generated files are left out of the language bar and collapsed in diffs.
+docs/** linguist-generated
