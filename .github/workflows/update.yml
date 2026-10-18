@@ -1,24 +1,28 @@
-# Runs the prediction pipeline every morning and publishes the results.
+# Runs the prediction pipeline every 3 hours and publishes the results.
 #
 # 1. Download the latest results and the fixture schedule.
 # 2. Score locked predictions that have been played; lock new ones for
-#    fixtures kicking off in the next 48 hours.
+#    fixtures kicking off in the next 24 hours.
 # 3. Re-simulate the season if a matchweek has finished.
 # 4. Rebuild the website data (docs/data.json) and commit any changes, which
 #    GitHub Pages then serves at https://azwadtahmid.github.io/PremierLeaguePredictor/
+#
+# A run where nothing changed makes no commit. Expect about one commit a day even
+# without new results: the provisional predictions for later fixtures are refreshed
+# as each day passes.
 
-name: Daily update
+name: Update predictions
 
 on:
   schedule:
-    - cron: "0 6 * * *"   # 06:00 UTC every day
+    - cron: "0 */3 * * *"   # every 3 hours (GitHub may start it a little late)
   workflow_dispatch:       # plus a "Run workflow" button in the Actions tab
 
 permissions:
   contents: write          # allows the job to commit the updated results
 
 concurrency:
-  group: daily-update
+  group: update-predictions
   cancel-in-progress: false
 
 jobs:
@@ -59,6 +63,8 @@ jobs:
           if git diff --cached --quiet; then
             echo "Nothing changed."
           else
-            git commit -m "Daily update $(date -u +%Y-%m-%d)"
+            git commit -m "Update predictions $(date -u '+%Y-%m-%d %H:%M') UTC"
+            # Someone may have pushed while this ran; put this commit on top.
+            git pull --rebase origin main
             git push
           fi
