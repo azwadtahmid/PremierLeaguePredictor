@@ -7,13 +7,13 @@ export function Footer() {
       <div className="wrap footer-inner">
         <div>
           <p className="footer-brand">PL Predictor</p>
-          <p>Predicted scorelines and a predicted final table for the 2026/27 Premier League, updated every morning.</p>
+          <p>Predicted scorelines and a predicted final table for the 2026/27 Premier League, checked for new results every 3 hours.</p>
         </div>
         <div>
           <p>
             Results and odds: <a href="https://www.football-data.co.uk/">football-data.co.uk</a>
             <br />
-            Fixtures: <a href="https://fixturedownload.com/">fixturedownload.com</a>
+            Fixtures and early scores: <a href="https://fixturedownload.com/">fixturedownload.com</a>
           </p>
           <p>
             <a href="https://github.com/azwadtahmid/PremierLeaguePredictor">Code, models and data on GitHub</a>

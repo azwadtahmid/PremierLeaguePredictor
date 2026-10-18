@@ -184,8 +184,8 @@ h2 {
 }
 .fixture:hover { translate: 0 -4px; box-shadow: 0 1px 0 var(--line), 0 22px 44px rgba(56, 0, 60, 0.14); }
 @keyframes cardIn { from { opacity: 0; translate: 0 28px; scale: 0.97; } }
-.fx-exact, .fx-result { border-top-color: var(--green); }
-.fx-wrong { border-top-color: var(--pink); }
+.verdict-exact, .verdict-result { border-top-color: var(--green); }
+.verdict-wrong { border-top-color: var(--pink); }
 .fx-top { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--ink-3); font-weight: 600; font-variant-numeric: tabular-nums; }
 .fx-main { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 14px; margin: 14px 0 12px; }
 .fx-team { font-family: var(--font-display); font-weight: 800; font-size: 25px; line-height: 1; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -201,6 +201,7 @@ h2 {
 .fx-result-exact, .fx-result-result { background: var(--green); color: var(--purple); }
 .fx-result-wrong { background: var(--pink); color: var(--white); }
 .fx-verdict { font-weight: 700; font-size: 14px; }
+.fx-early { margin: -6px 0 12px; font-size: 12px; font-weight: 600; color: var(--ink-3); }
 
 .prob-bar { display: flex; gap: 3px; height: 10px; border-radius: 6px; overflow: hidden; background: var(--lilac); }
 .prob-bar span { width: calc(var(--w) * 100%); transform-origin: left; animation: barIn 1s var(--ease) both; animation-delay: calc(var(--i, 0) * 55ms + 250ms); }

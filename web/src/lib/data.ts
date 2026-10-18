@@ -25,6 +25,8 @@ export interface Fixture {
   correct_score: boolean | null;
   points: number | null;
   bookmaker_pick: Result | null;
+  // "fixturedownload" = early score; shots and Bet365 odds still to come.
+  result_source: "football-data" | "fixturedownload" | null;
 }
 
 export interface Summary {

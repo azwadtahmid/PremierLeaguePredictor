@@ -16,7 +16,7 @@ const STEPS = [
   {
     n: "03",
     title: "Honest scoring",
-    text: "Each prediction is locked about 48 hours before kick-off and never edited. A right result scores 1 point, an exact score 3. The benchmarks are \"always pick the home team\" and the Bet365 favourite.",
+    text: "Each prediction is locked about 24 hours before kick-off and never edited. A right result scores 1 point, an exact score 3. The benchmarks are \"always pick the home team\" and the Bet365 favourite.",
   },
   {
     n: "04",

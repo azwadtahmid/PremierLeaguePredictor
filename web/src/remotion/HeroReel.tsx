@@ -301,7 +301,7 @@ const Outro: React.FC<{ favourite: NonNullable<HeroProps["favourite"]> }> = ({ f
           <div style={{ width: `${shown}%`, height: "100%", background: PL.green, borderRadius: unit }} />
         </div>
         <div style={{ marginTop: unit * 3, fontSize: unit * (portrait ? 3.2 : 2.6), opacity: interpolate(frame, [40, 60], [0, 0.7], clamp) }}>
-          From 10,000 simulations of the rest of the season · updated every morning
+          From 10,000 simulations of the rest of the season · updated automatically
         </div>
       </AbsoluteFill>
     </AbsoluteFill>

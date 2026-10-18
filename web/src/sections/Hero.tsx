@@ -61,7 +61,7 @@ export function Hero({ data }: { data: SiteData }) {
             <a className="btn btn-ghost" href="#table">Predicted table</a>
           </div>
           <p className="hero-updated">
-            <span className="live-dot" aria-hidden="true" /> Updated {updated} UK time · refreshed every morning
+            <span className="live-dot" aria-hidden="true" /> Updated {updated} UK time · checked for new results every 3 hours
           </p>
         </div>
       </div>

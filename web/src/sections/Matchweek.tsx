@@ -5,7 +5,7 @@ import { Reveal } from "../lib/motion";
 
 const TAG = {
   locked: ["Locked", "made before kick-off, never changed"],
-  provisional: ["Provisional", "updates daily, locks about 48 hours before kick-off"],
+  provisional: ["Provisional", "refreshed daily, locks about 24 hours before kick-off"],
   backtest: ["Backtest", "before live tracking began, using only earlier results"],
 } as const;
 
@@ -40,7 +40,8 @@ function FixtureCard({ fixture: f, index }: { fixture: Fixture; index: number })
   const time = f.status === "postponed" ? "Postponed" : ukDate(f.kickoff, { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <article className={`fixture ${verdict ? `fx-${verdict}` : ""}`} style={{ "--i": index } as React.CSSProperties}>
+    // "verdict-…" (not "fx-…"): .fx-result is the score bar inside the card.
+    <article className={`fixture ${verdict ? `verdict-${verdict}` : ""}`} style={{ "--i": index } as React.CSSProperties}>
       <div className="fx-top">
         <span className="fx-time">{time}</span>
         <span className={`tag tag-${p.source}`}>{TAG[p.source][0]}</span>
@@ -58,6 +59,9 @@ function FixtureCard({ fixture: f, index }: { fixture: Fixture; index: number })
           <span>Final <strong>{dash(f.score)}</strong></span>
           <span className="fx-verdict">{verdictText[verdict!]}</span>
         </div>
+      )}
+      {played && f.result_source === "fixturedownload" && (
+        <p className="fx-early">Early score from fixturedownload.com · Bet365 odds and full stats to follow</p>
       )}
       <ProbBar probs={p.probs} />
       <p className="fx-detail">
