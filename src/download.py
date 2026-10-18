@@ -5,7 +5,9 @@
    kept; choosing and cleaning columns happens later.
 2. Schedule: every 2026/27 fixture with its matchweek and kick-off time, from
    fixturedownload.com, saved as data/schedule.csv. football-data.co.uk only
-   lists the next few days, so the full schedule comes from here.
+   lists the next few days, so the full schedule comes from here. Its scores
+   are kept too: they usually appear a day or two before football-data's, so
+   src/schedule.py uses them as a stand-in until football-data catches up.
 
 Run from anywhere:  python src/download.py
 """
@@ -65,6 +67,9 @@ def download_schedule(matches):
         "kickoff": pd.to_datetime(feed["DateUtc"], utc=True).dt.strftime("%Y-%m-%dT%H:%MZ"),
         "HomeTeam": feed["HomeTeam"].replace(TEAM_NAMES),
         "AwayTeam": feed["AwayTeam"].replace(TEAM_NAMES),
+        # Blank until the match is played.
+        "home_score": feed["HomeTeamScore"],
+        "away_score": feed["AwayTeamScore"],
     })
 
     # Every schedule name must match a 2026/27 team in the results.

@@ -9,6 +9,9 @@ For every 2026/27 fixture, the website shows one prediction:
                about 48 hours before kick-off.
 
 Also writes models/goals_model.json: the goals model's current team ratings.
+
+Both files are only rewritten when their content changes (ignoring the
+timestamp), so a run with nothing new doesn't produce a commit.
 Run after predict.py and simulate.py:  python src/site.py
 """
 
@@ -20,7 +23,7 @@ import pandas as pd
 
 from features import MATCHES, prepare
 from goals import GoalsModel, describe
-from schedule import PAIR, SEASON, completed_rounds, load_fixtures
+from schedule import PAIR, SEASON, all_results, completed_rounds, load_fixtures
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RESULTS = PROJECT_ROOT / "results"
@@ -133,6 +136,8 @@ def fixture_json(row):
         "correct_score": None if row["status"] != "played" else bool(row["correct_score"]),
         "points": None if row["status"] != "played" else int(row["points"]),
         "bookmaker_pick": row["bookmaker_pick"],
+        # "fixturedownload" = early score; shots and odds still to come.
+        "result_source": row["result_source"] if row["status"] == "played" else None,
     }
 
 
@@ -217,11 +222,26 @@ def race(history, column, threshold):
                       for t in latest.index]}
 
 
+def write_if_changed(path, data, ignore, **dump_options):
+    """Write JSON only if something other than the `ignore` field changed."""
+    body = json.loads(json.dumps({k: v for k, v in data.items() if k != ignore}))
+    if path.exists():
+        old = json.loads(path.read_text())
+        old.pop(ignore, None)
+        if old == body:
+            print(f"{path.name}: no changes")
+            return
+    path.parent.mkdir(exist_ok=True)
+    path.write_text(json.dumps(data, **dump_options))
+    print(f"Wrote {path} ({path.stat().st_size // 1024} KB)")
+
+
 def main(now=None):
     now = pd.Timestamp.now(tz="UTC").floor("min") if now is None else now
     raw = pd.read_csv(MATCHES, low_memory=False).copy()
-    matches = prepare(raw)
-    fixtures = score(all_predictions(load_fixtures(raw, now), matches, now))
+    fixtures = load_fixtures(raw, now)
+    matches = prepare(all_results(raw, fixtures))  # football-data + stand-in scores
+    fixtures = score(all_predictions(fixtures, matches, now))
     history = pd.read_csv(HISTORY) if HISTORY.exists() else pd.DataFrame()
 
     upcoming = fixtures[fixtures["status"] == "upcoming"]
@@ -245,16 +265,15 @@ def main(now=None):
         .to_dict("records") if METRICS.exists() else None,
     }
     OUTPUT.parent.mkdir(exist_ok=True)
-    OUTPUT.write_text(json.dumps(data, separators=(",", ":")))
-    print(f"Wrote {OUTPUT} ({OUTPUT.stat().st_size // 1024} KB): "
-          f"{len(played)} played, {len(upcoming)} upcoming")
+    print(f"{len(played)} played ({(played['result_source'] == 'fixturedownload').sum()} "
+          f"from stand-in scores), {len(upcoming)} upcoming")
+    write_if_changed(OUTPUT, data, ignore="updated", separators=(",", ":"))
 
     # The goals model as it stands today, readable in the repo.
     teams = sorted(set(fixtures["HomeTeam"]))
     model = GoalsModel().fit(matches, as_of=now.tz_localize(None), teams=teams)
     RATINGS.parent.mkdir(exist_ok=True)
-    RATINGS.write_text(json.dumps(model.ratings(), indent=1))
-    print(f"Wrote {RATINGS}")
+    write_if_changed(RATINGS, model.ratings(), ignore="fitted_as_of", indent=1)
 
 
 if __name__ == "__main__":

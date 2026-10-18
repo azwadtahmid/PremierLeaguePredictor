@@ -14,9 +14,15 @@ For each completed matchweek (one that isn't in the history yet):
 Each matchweek's predicted table is appended to results/table_history.csv,
 so the website can show how it changes week to week. The latest one is also
 saved as results/season_simulation.csv and results/season_simulation.png.
+
+Results include fixturedownload.com stand-in scores until football-data
+catches up (see src/schedule.py). Each snapshot stores a fingerprint of the
+scores it was built from. If those scores later change (football-data
+correcting a stand-in), that matchweek and every later one are rebuilt.
 Run after src/download.py:  python src/simulate.py
 """
 
+import hashlib
 from pathlib import Path
 
 import matplotlib
@@ -26,9 +32,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from features import MATCHES, load_matches
+from features import MATCHES, prepare
 from goals import GoalsModel
-from schedule import SEASON, completed_rounds, load_fixtures
+from schedule import PAIR, SEASON, all_results, completed_rounds, load_fixtures
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RESULTS = PROJECT_ROOT / "results"
@@ -148,36 +154,62 @@ def predict_table(matches, played, teams):
     return summarise(table, positions, pts, teams)
 
 
+def scores_key(played):
+    """Short fingerprint of the scores a snapshot was built from."""
+    rows = played.sort_values(PAIR)[[*PAIR, "FTHG", "FTAG"]].astype({"FTHG": int, "FTAG": int})
+    return hashlib.sha1(rows.to_csv(index=False).encode()).hexdigest()[:12]
+
+
 def main(now=None):
     now = pd.Timestamp.now(tz="UTC") if now is None else now
-    matches = load_matches()
+    raw = pd.read_csv(MATCHES, low_memory=False).copy()
+    fixtures = load_fixtures(raw, now)
+    matches = prepare(all_results(raw, fixtures))  # football-data + stand-in scores
     season = matches[matches["Season"] == SEASON]
     teams = sorted(set(season["HomeTeam"]) | set(season["AwayTeam"]))
     if len(teams) != 20:
         raise SystemExit(f"Expected 20 teams in {SEASON}, found {len(teams)}: {teams}")
 
-    fixtures = load_fixtures(pd.read_csv(MATCHES, low_memory=False), now)
+    def played_after(round_number):
+        """The matches played by the end of this matchweek."""
+        in_round = fixtures[(fixtures["round"] == round_number) & (fixtures["status"] == "played")]
+        cutoff = pd.to_datetime(in_round["Date"], format="%d/%m/%Y").max()
+        return season[season["Date"] <= cutoff]
+
+    complete = completed_rounds(fixtures)
+    keys = {r: scores_key(played_after(r)) for r in complete}
     history = pd.read_csv(HISTORY) if HISTORY.exists() else pd.DataFrame(columns=["round"])
-    new_rounds = [r for r in completed_rounds(fixtures) if r not in set(history["round"])]
+    if "scores_key" not in history:
+        # Snapshots saved before fingerprints existed: take today's scores as theirs.
+        history["scores_key"] = history["round"].map(keys)
+
+    # Rebuild from the first matchweek whose scores have changed since its snapshot.
+    saved = history.drop_duplicates("round").set_index("round")["scores_key"]
+    changed = [r for r in saved.index if r in keys and saved[r] != keys[r]]
+    if changed:
+        print(f"Scores changed for matchweek {min(changed)}: rebuilding from there.")
+        history = history[history["round"] < min(changed)]
+
+    new_rounds = [r for r in complete if r not in set(history["round"])]
     if not new_rounds:
+        if not history.empty:  # keeps the fingerprint column up to date
+            history.to_csv(HISTORY, index=False, float_format="%.4f")
         print("No newly completed matchweek; predicted table unchanged.")
         return
 
     RESULTS.mkdir(exist_ok=True)
     for round_number in new_rounds:
         # The table as it stood at the end of this matchweek.
-        in_round = fixtures[(fixtures["round"] == round_number) & (fixtures["status"] == "played")]
-        cutoff = pd.to_datetime(in_round["Date"], format="%d/%m/%Y").max()
-        played = season[season["Date"] <= cutoff]
+        played = played_after(round_number)
         summary, position_share = predict_table(matches, played, teams)
 
-        snapshot = summary.assign(round=round_number,
-                                  predicted_position=summary.index).reset_index(drop=True)
+        snapshot = summary.assign(round=round_number, predicted_position=summary.index,
+                                  scores_key=keys[round_number]).reset_index(drop=True)
         history = pd.concat([history, snapshot], ignore_index=True)
         print(f"Matchweek {round_number}: {len(played)} played; "
               f"favourite {summary.iloc[0]['team']} ({summary.iloc[0]['champion']:.1%})")
 
-    history = history[["round", "predicted_position", *summary.columns]].astype(
+    history = history[["round", "predicted_position", *summary.columns, "scores_key"]].astype(
         {"round": int, "predicted_position": int, "played": int, "points_now": int})
     history.to_csv(HISTORY, index=False, float_format="%.4f")
 

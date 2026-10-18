@@ -1,16 +1,20 @@
 """Lock predictions before kick-off, then score them once results are in.
 
-Each run (the GitHub Action runs this every day):
+Each run (the GitHub Action runs this every 3 hours):
 1. Score: for every logged prediction whose match has been played, fill in
    the real result and score, mark the result and exact score right or wrong,
    and give points: 3 for the exact score, 1 for the right result only.
-2. Lock: every fixture kicking off within the next 48 hours that isn't in the
+2. Lock: every fixture kicking off within the next 24 hours that isn't in the
    log yet gets a prediction, appended to results/predictions.csv. A logged
    prediction is never changed, so the track record is honest.
 
 Predictions come from the goals model (src/goals.py), refit on every result
 so far, with the form model (models/model.joblib) as a second opinion. It
 needs 5 recent matches per team, so it can be blank.
+
+Results come from football-data.co.uk, or from fixturedownload.com until
+football-data catches up (see src/schedule.py). Scoring is redone on every
+run, so if football-data later corrects a stand-in score, the points follow.
 
 Fixtures come from data/schedule.csv (made by src/download.py).
 Run after src/download.py:  python src/predict.py
@@ -24,28 +28,34 @@ import pandas as pd
 
 from features import MATCHES, build_features, prepare
 from goals import GoalsModel, describe
-from schedule import PAIR, SEASON, load_fixtures
+from schedule import PAIR, SEASON, all_results, load_fixtures
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 MODEL_PATH = PROJECT_ROOT / "models" / "model.joblib"
 PREDICTIONS = PROJECT_ROOT / "results" / "predictions.csv"
 
-LOCK_WINDOW = pd.Timedelta(hours=48)
+# With a run every 3 hours, predictions lock 21 to 24 hours before kick-off.
+LOCK_WINDOW = pd.Timedelta(hours=24)
 RESULT_COLUMNS = ["actual", "actual_score", "correct_result", "correct_score", "points",
-                  "bookmaker_pick"]
+                  "bookmaker_pick", "result_source"]
 
 
 def score(log, fixtures):
     """Fill in results, right/wrong and points for played matches."""
     played = fixtures[fixtures["status"] == "played"]
+    # Bet365 favourite = lowest pre-match odds. Stand-in results have no odds
+    # yet, so their pick stays blank until football-data adds the match.
     odds = played[["B365A", "B365D", "B365H"]]
+    has_odds = odds.notna().all(axis=1)
+    pick = pd.Series(pd.NA, index=played.index, dtype="object")
+    if has_odds.any():
+        pick[has_odds] = odds[has_odds].idxmin(axis=1).str.removeprefix("B365")
     results = played[PAIR].assign(
         actual=played["FTR"],
         actual_score=played["FTHG"].astype(int).astype(str) + "-"
         + played["FTAG"].astype(int).astype(str),
-        # Bet365 favourite = lowest pre-match odds, from the results file.
-        bookmaker_pick=odds.idxmin(axis=1).str.removeprefix("B365")
-        .where(odds.notna().all(axis=1)),
+        bookmaker_pick=pick,
+        result_source=played["result_source"],
     )
     log = log.drop(columns=RESULT_COLUMNS, errors="ignore").merge(results, on=PAIR, how="left")
 
@@ -94,10 +104,14 @@ def form_predictions(fixtures, matches, bundle):
         form_prediction=np.array(bundle["classes"])[probabilities.argmax(axis=1)])
 
 
-def lock(fixtures, matches, bundle, now):
-    """Predictions for the given fixtures, ready to append to the log."""
+def lock(fixtures, matches, results, bundle, now):
+    """Predictions for the given fixtures, ready to append to the log.
+
+    `results` (football-data plus stand-in scores) feeds the goals model;
+    `matches` (football-data only, with shots) feeds the form model.
+    """
     teams = sorted(set(fixtures["HomeTeam"]) | set(fixtures["AwayTeam"]))
-    model = GoalsModel().fit(prepare(matches), as_of=now.tz_localize(None), teams=teams)
+    model = GoalsModel().fit(prepare(results), as_of=now.tz_localize(None), teams=teams)
     predicted = describe(model, fixtures["HomeTeam"], fixtures["AwayTeam"])
     rows = pd.concat([fixtures[["round", "kickoff", *PAIR]].reset_index(drop=True),
                       predicted], axis=1)
@@ -118,7 +132,7 @@ def main(now=None, predictions_path=PREDICTIONS):
         log = score(log, fixtures)
         report(log)
 
-    # 2. Lock fixtures kicking off within the next 48 hours.
+    # 2. Lock fixtures kicking off within the next 24 hours.
     soon = fixtures[(fixtures["status"] == "upcoming") & (fixtures["kickoff"] > now)
                     & (fixtures["kickoff"] <= now + LOCK_WINDOW)]
     if log is not None:
@@ -126,7 +140,8 @@ def main(now=None, predictions_path=PREDICTIONS):
         soon = soon[soon[PAIR].merge(logged, on=PAIR, how="left")["logged"].isna().to_numpy()]
 
     if len(soon):
-        new = lock(soon, matches, joblib.load(MODEL_PATH), now)
+        results = all_results(matches, fixtures)
+        new = lock(soon, matches, results, joblib.load(MODEL_PATH), now)
         print(f"\nLocked {len(new)} prediction(s):")
         print(new[["kickoff", *PAIR, "predicted_score", "prob_H", "prob_D", "prob_A",
                    "likely_scores"]].to_string(index=False))
