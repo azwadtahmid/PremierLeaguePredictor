@@ -2,11 +2,11 @@
 
 Predicts every 2026/27 Premier League scoreline and the final league table, then checks each prediction against the real result after every matchweek.
 
-**Live site: [azwadtahmid.github.io/PremierLeaguePredictor](https://azwadtahmid.github.io/PremierLeaguePredictor/)**, updated automatically every morning.
+**Live site: [azwadtahmid.github.io/PremierLeaguePredictor](https://azwadtahmid.github.io/PremierLeaguePredictor/)**, checked for new results every 3 hours.
 
 - **Matchweek by matchweek:** each fixture with its predicted score, home/draw/away chances and the 3 most likely scorelines. Once played, the real score sits next to the prediction with a right/wrong verdict and points.
 - **Predicted final table:** title, top 4 and relegation chances from 10,000 simulations of the rest of the season, with the change since the previous matchweek beside each team.
-- **Honest track record:** predictions are locked about 48 hours before kick-off and never edited, then compared with "always pick the home team" and the Bet365 favourite.
+- **Honest track record:** predictions are locked about 24 hours before kick-off and never edited, then compared with "always pick the home team" and the Bet365 favourite.
 
 ![Predicted final table](results/season_simulation.png)
 
@@ -51,7 +51,9 @@ Permutation importance for the random forest: shuffle one feature in the test se
 ### Data
 
 - **Results and odds:** [football-data.co.uk](https://www.football-data.co.uk/), one CSV per season from 2015/16 (`E0` = Premier League), read straight from the site with pandas. 4,240 matches.
-- **2026/27 schedule:** [fixturedownload.com](https://fixturedownload.com/), for matchweek numbers and kick-off times. Two club names are mapped to football-data's spelling (`Man Utd`, `Spurs`).
+- **2026/27 schedule and early scores:** [fixturedownload.com](https://fixturedownload.com/), for matchweek numbers, kick-off times and scores. Two club names are mapped to football-data's spelling (`Man Utd`, `Spurs`).
+
+**Two result sources.** football-data.co.uk is often a day or two behind, so a fixturedownload score stands in until it catches up. football-data always wins once it has the match, and adds the shots and Bet365 odds the stand-in lacks. Scoring is redone on every run, so a corrected score corrects the points too. Each saved predicted table also stores a fingerprint of the scores it was built from; if those scores change, that matchweek's table and every later one are rebuilt.
 
 Checks in [`notebooks/01_explore.ipynb`](notebooks/01_explore.ipynb): no missing values in the columns used, team names spelled the same in every season, and dates that parse correctly even though 2016/17 uses two-digit years.
 
@@ -94,10 +96,10 @@ Each matchweek's table is saved in [`results/table_history.csv`](results/table_h
 
 ### Live tracking and scoring
 
-A [GitHub Actions workflow](.github/workflows/update.yml) runs every morning at 06:00 UTC:
+A [GitHub Actions workflow](.github/workflows/update.yml) runs every 3 hours and only commits when something changed:
 
 1. `download.py`: the latest results and schedule.
-2. `predict.py`: scores locked predictions that have been played, and **locks** a prediction for every fixture kicking off in the next 48 hours. Locked predictions go in `results/predictions.csv` (created when the first one is locked) and are never changed.
+2. `predict.py`: scores locked predictions that have been played, and **locks** a prediction for every fixture kicking off in the next 24 hours. Locked predictions go in `results/predictions.csv` (created when the first one is locked) and are never changed.
 3. `simulate.py`: re-simulates the season once a matchweek is complete.
 4. `site.py`: rebuilds the website data, then the workflow commits the changes.
 
