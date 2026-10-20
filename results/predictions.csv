@@ -1,11 +1,11 @@
 locked_at,round,kickoff,HomeTeam,AwayTeam,prob_H,prob_D,prob_A,prediction,predicted_score,likely_scores,home_xg,away_xg,form_prediction,actual,actual_score,correct_result,correct_score,points,bookmaker_pick,result_source
-2026-10-16T11:10Z,7,2026-10-17T11:30Z,Everton,Chelsea,0.396,0.248,0.356,H,2-1,"1-1 12%, 2-1 9%, 1-0 8%",1.49,1.4,H,A,0-2,False,False,0,,fixturedownload
-2026-10-16T11:10Z,7,2026-10-17T14:00Z,Brentford,Liverpool,0.435,0.242,0.322,H,2-1,"1-1 11%, 2-1 9%, 1-0 8%",1.61,1.36,H,A,1-2,False,False,0,,fixturedownload
-2026-10-16T11:10Z,7,2026-10-17T14:00Z,Fulham,Hull,0.353,0.289,0.357,A,0-1,"1-1 13%, 0-1 12%, 1-0 12%",1.11,1.12,H,H,1-0,False,False,0,,fixturedownload
-2026-10-16T11:10Z,7,2026-10-17T14:00Z,Man City,Ipswich,0.852,0.096,0.052,H,3-0,"3-0 10%, 2-0 9%, 4-0 8%",3.32,0.77,H,H,3-2,True,False,1,,fixturedownload
-2026-10-16T11:10Z,7,2026-10-17T16:30Z,Newcastle,Aston Villa,0.43,0.227,0.344,H,2-1,"1-1 10%, 2-1 9%, 1-2 8%",1.78,1.57,A,A,0-1,False,False,0,,fixturedownload
-2026-10-17T10:29Z,7,2026-10-18T13:00Z,Bournemouth,Sunderland,0.507,0.247,0.246,H,1-0,"1-1 12%, 1-0 11%, 2-1 10%",1.63,1.06,H,H,2-0,True,False,1,,fixturedownload
-2026-10-17T10:29Z,7,2026-10-18T13:00Z,Brighton,Crystal Palace,0.649,0.196,0.156,H,2-0,"2-0 10%, 2-1 10%, 1-0 10%",2.16,0.95,H,H,5-0,True,False,1,,fixturedownload
-2026-10-17T10:29Z,7,2026-10-18T13:00Z,Leeds,Man United,0.404,0.259,0.337,H,1-0,"1-1 12%, 1-0 10%, 0-1 9%",1.41,1.27,A,D,1-1,False,False,0,,fixturedownload
-2026-10-17T10:29Z,7,2026-10-18T15:30Z,Nott'm Forest,Arsenal,0.195,0.264,0.541,A,0-1,"0-1 16%, 1-1 12%, 0-2 12%",0.77,1.48,H,A,0-1,True,True,3,,fixturedownload
-2026-10-18T10:49Z,7,2026-10-19T19:00Z,Tottenham,Coventry,0.444,0.27,0.286,H,1-0,"1-1 13%, 1-0 12%, 0-1 9%",1.38,1.05,H,,,,,,,
+2026-10-16T11:10Z,7,2026-10-17T11:30Z,Everton,Chelsea,0.396,0.248,0.356,H,2-1,"1-1 12%, 2-1 9%, 1-0 8%",1.49,1.4,H,A,0-2,False,False,0,A,football-data
+2026-10-16T11:10Z,7,2026-10-17T14:00Z,Brentford,Liverpool,0.435,0.242,0.322,H,2-1,"1-1 11%, 2-1 9%, 1-0 8%",1.61,1.36,H,A,1-2,False,False,0,H,football-data
+2026-10-16T11:10Z,7,2026-10-17T14:00Z,Fulham,Hull,0.353,0.289,0.357,A,0-1,"1-1 13%, 0-1 12%, 1-0 12%",1.11,1.12,H,H,1-0,False,False,0,H,football-data
+2026-10-16T11:10Z,7,2026-10-17T14:00Z,Man City,Ipswich,0.852,0.096,0.052,H,3-0,"3-0 10%, 2-0 9%, 4-0 8%",3.32,0.77,H,H,3-2,True,False,1,H,football-data
+2026-10-16T11:10Z,7,2026-10-17T16:30Z,Newcastle,Aston Villa,0.43,0.227,0.344,H,2-1,"1-1 10%, 2-1 9%, 1-2 8%",1.78,1.57,A,A,0-1,False,False,0,H,football-data
+2026-10-17T10:29Z,7,2026-10-18T13:00Z,Bournemouth,Sunderland,0.507,0.247,0.246,H,1-0,"1-1 12%, 1-0 11%, 2-1 10%",1.63,1.06,H,H,2-0,True,False,1,H,football-data
+2026-10-17T10:29Z,7,2026-10-18T13:00Z,Brighton,Crystal Palace,0.649,0.196,0.156,H,2-0,"2-0 10%, 2-1 10%, 1-0 10%",2.16,0.95,H,H,5-0,True,False,1,H,football-data
+2026-10-17T10:29Z,7,2026-10-18T13:00Z,Leeds,Man United,0.404,0.259,0.337,H,1-0,"1-1 12%, 1-0 10%, 0-1 9%",1.41,1.27,A,D,1-1,False,False,0,H,football-data
+2026-10-17T10:29Z,7,2026-10-18T15:30Z,Nott'm Forest,Arsenal,0.195,0.264,0.541,A,0-1,"0-1 16%, 1-1 12%, 0-2 12%",0.77,1.48,H,A,0-1,True,True,3,A,football-data
+2026-10-18T10:49Z,7,2026-10-19T19:00Z,Tottenham,Coventry,0.444,0.27,0.286,H,1-0,"1-1 13%, 1-0 12%, 0-1 9%",1.38,1.05,H,H,3-1,True,False,1,H,football-data
