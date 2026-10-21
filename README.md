@@ -166,7 +166,7 @@ On macOS, if XGBoost fails with a `libomp` error, run `brew install libomp`.
 ## Project structure
 
 ```
-.github/workflows/update.yml  daily automatic update
+.github/workflows/update.yml  automatic update every 3 hours
 data/                         downloaded data (not in the repo; rebuilt by download.py)
 docs/                         the built website (GitHub Pages) and its daily data.json
 web/                          website source: React + Remotion Player (builds into docs/)
