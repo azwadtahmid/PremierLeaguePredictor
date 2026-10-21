@@ -13,8 +13,10 @@ Run from anywhere:  python src/download.py
 """
 
 import json
+import time
 import urllib.request
 from pathlib import Path
+from urllib.error import HTTPError, URLError
 
 import pandas as pd
 
@@ -34,6 +36,25 @@ OUTPUT = PROJECT_ROOT / "data" / "matches.csv"
 SCHEDULE = PROJECT_ROOT / "data" / "schedule.csv"
 
 
+def with_retries(fetch, what, attempts=3, waits=(15, 60)):
+    """Run a download, retrying if the website has a temporary problem.
+
+    Sites sometimes time out or return a server error (e.g. HTTP 504); waiting
+    a little usually fixes it. Permanent errors such as 404 (wrong address)
+    fail straight away, so real problems still stop the job.
+    """
+    for attempt in range(1, attempts + 1):
+        try:
+            return fetch()
+        except (HTTPError, URLError, TimeoutError) as error:
+            temporary = not isinstance(error, HTTPError) or error.code >= 500 or error.code == 429
+            if not temporary or attempt == attempts:
+                raise
+            wait = waits[min(attempt, len(waits)) - 1]
+            print(f"{what}: {error}. Retrying in {wait}s (attempt {attempt + 1} of {attempts}).")
+            time.sleep(wait)
+
+
 def season_label(code):
     """Turn a URL code like "1516" into a readable label like "2015/16"."""
     return f"20{code[:2]}/{code[2:]}"
@@ -45,7 +66,8 @@ def download_results():
     for code in SEASONS:
         # .copy() packs the freshly read columns together in memory, so
         # adding one more column doesn't trigger a PerformanceWarning.
-        table = pd.read_csv(URL.format(code=code)).copy()
+        url = URL.format(code=code)
+        table = with_retries(lambda: pd.read_csv(url), season_label(code)).copy()
         table["Season"] = season_label(code)
         tables.append(table)
         print(f"{season_label(code)}: {len(table)} matches")
@@ -59,8 +81,12 @@ def download_schedule(matches):
     """All 380 fixtures of the current season: matchweek, kick-off, teams."""
     # The site refuses Python's default user agent, so identify as a browser.
     request = urllib.request.Request(SCHEDULE_URL, headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(request, timeout=30) as response:
-        feed = pd.DataFrame(json.load(response))
+
+    def fetch():
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return json.load(response)
+
+    feed = pd.DataFrame(with_retries(fetch, "schedule"))
 
     schedule = pd.DataFrame({
         "round": feed["RoundNumber"],
