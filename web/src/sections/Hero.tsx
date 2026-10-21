@@ -11,7 +11,9 @@ export function Hero({ data }: { data: SiteData }) {
   const props = useMemo<HeroProps>(() => {
     const round = data.rounds.find((r) => r.round === data.next_round) ?? null;
     const fixtures = (round?.fixtures ?? [])
-      .filter((f) => f.status !== "played")
+      // Only fixtures still to kick off; ones already under way are shown as
+      // "awaiting result" in the matchweek section instead.
+      .filter((f) => f.status === "upcoming" && new Date(f.kickoff).getTime() > Date.now())
       .map((f) => ({
         home: f.home,
         away: f.away,

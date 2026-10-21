@@ -35,6 +35,8 @@ function ProbBar({ probs }: { probs: Fixture["prediction"]["probs"] }) {
 function FixtureCard({ fixture: f, index }: { fixture: Fixture; index: number }) {
   const p = f.prediction;
   const played = f.status === "played";
+  // Past kick-off but no score from either source yet.
+  const awaiting = f.status === "upcoming" && new Date(f.kickoff).getTime() <= Date.now();
   const verdict = !played ? null : f.correct_score ? "exact" : f.correct_result ? "result" : "wrong";
   const verdictText = { exact: "✓ Exact score · +3", result: "✓ Right result · +1", wrong: "✗ Wrong · 0" };
   const time = f.status === "postponed" ? "Postponed" : ukDate(f.kickoff, { hour: "2-digit", minute: "2-digit" });
@@ -58,6 +60,12 @@ function FixtureCard({ fixture: f, index }: { fixture: Fixture; index: number })
         <div className={`fx-result fx-result-${verdict}`}>
           <span>Final <strong>{dash(f.score)}</strong></span>
           <span className="fx-verdict">{verdictText[verdict!]}</span>
+        </div>
+      )}
+      {awaiting && (
+        <div className="fx-result fx-result-awaiting">
+          <span>Kicked off · <strong>awaiting result</strong></span>
+          <span className="fx-verdict">Scores are checked every 3 hours</span>
         </div>
       )}
       {played && f.result_source === "fixturedownload" && (
