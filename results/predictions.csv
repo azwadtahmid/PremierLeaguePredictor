@@ -9,3 +9,4 @@ locked_at,round,kickoff,HomeTeam,AwayTeam,prob_H,prob_D,prob_A,prediction,predic
 2026-10-17T10:29Z,7,2026-10-18T13:00Z,Leeds,Man United,0.404,0.259,0.337,H,1-0,"1-1 12%, 1-0 10%, 0-1 9%",1.41,1.27,A,D,1-1,False,False,0,H,football-data
 2026-10-17T10:29Z,7,2026-10-18T15:30Z,Nott'm Forest,Arsenal,0.195,0.264,0.541,A,0-1,"0-1 16%, 1-1 12%, 0-2 12%",0.77,1.48,H,A,0-1,True,True,3,A,football-data
 2026-10-18T10:49Z,7,2026-10-19T19:00Z,Tottenham,Coventry,0.444,0.27,0.286,H,1-0,"1-1 13%, 1-0 12%, 0-1 9%",1.38,1.05,H,H,3-1,True,False,1,H,football-data
+2026-10-22T21:21Z,8,2026-10-23T19:00Z,Ipswich,Nott'm Forest,0.323,0.239,0.438,A,1-2,"1-1 11%, 1-2 9%, 0-1 8%",1.39,1.65,A,,,,,,,
