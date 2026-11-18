@@ -1,143 +1,143 @@
 {
- "fitted_as_of": "2026-11-17",
+ "fitted_as_of": "2026-11-18",
  "half_life_days": 180,
- "base_rate": 1.319,
- "home_advantage": 1.237,
+ "base_rate": 1.321,
+ "home_advantage": 1.236,
  "teams": [
   {
    "team": "Man City",
-   "attack": 0.236,
-   "defence": 0.196
+   "attack": 0.23,
+   "defence": 0.192
   },
   {
    "team": "Brighton",
-   "attack": 0.171,
-   "defence": 0.229
+   "attack": 0.165,
+   "defence": 0.225
   },
   {
    "team": "Arsenal",
-   "attack": 0.104,
-   "defence": 0.683
+   "attack": 0.098,
+   "defence": 0.677
   },
   {
    "team": "Liverpool",
-   "attack": 0.092,
-   "defence": 0.093
-  },
-  {
-   "team": "Chelsea",
-   "attack": 0.083,
-   "defence": -0.097
-  },
-  {
-   "team": "Man United",
-   "attack": 0.044,
-   "defence": -0.144
-  },
-  {
-   "team": "Aston Villa",
-   "attack": 0.037,
-   "defence": -0.093
-  },
-  {
-   "team": "Bournemouth",
-   "attack": 0.005,
-   "defence": 0.02
-  },
-  {
-   "team": "Brentford",
-   "attack": 0.003,
-   "defence": 0.034
-  },
-  {
-   "team": "Newcastle",
-   "attack": -0.064,
-   "defence": -0.147
-  },
-  {
-   "team": "Ipswich",
-   "attack": -0.097,
-   "defence": -0.449
-  },
-  {
-   "team": "Luton",
-   "attack": -0.118,
-   "defence": -0.539
-  },
-  {
-   "team": "West Ham",
-   "attack": -0.196,
-   "defence": -0.192
-  },
-  {
-   "team": "Nott'm Forest",
-   "attack": -0.216,
-   "defence": 0.047
-  },
-  {
-   "team": "Everton",
-   "attack": -0.258,
+   "attack": 0.086,
    "defence": 0.089
   },
   {
+   "team": "Chelsea",
+   "attack": 0.076,
+   "defence": -0.101
+  },
+  {
+   "team": "Man United",
+   "attack": 0.038,
+   "defence": -0.148
+  },
+  {
+   "team": "Aston Villa",
+   "attack": 0.031,
+   "defence": -0.097
+  },
+  {
+   "team": "Bournemouth",
+   "attack": -0.001,
+   "defence": 0.017
+  },
+  {
+   "team": "Brentford",
+   "attack": -0.003,
+   "defence": 0.03
+  },
+  {
+   "team": "Newcastle",
+   "attack": -0.07,
+   "defence": -0.151
+  },
+  {
+   "team": "Ipswich",
+   "attack": -0.102,
+   "defence": -0.454
+  },
+  {
+   "team": "Luton",
+   "attack": -0.123,
+   "defence": -0.546
+  },
+  {
+   "team": "West Ham",
+   "attack": -0.203,
+   "defence": -0.196
+  },
+  {
+   "team": "Nott'm Forest",
+   "attack": -0.222,
+   "defence": 0.043
+  },
+  {
+   "team": "Everton",
+   "attack": -0.264,
+   "defence": 0.085
+  },
+  {
    "team": "Tottenham",
-   "attack": -0.261,
-   "defence": -0.057
+   "attack": -0.267,
+   "defence": -0.061
   },
   {
    "team": "Leeds",
-   "attack": -0.266,
-   "defence": 0.163
+   "attack": -0.273,
+   "defence": 0.159
   },
   {
    "team": "Coventry",
-   "attack": -0.27,
-   "defence": -0.342
+   "attack": -0.275,
+   "defence": -0.343
   },
   {
    "team": "Crystal Palace",
-   "attack": -0.316,
-   "defence": -0.276
+   "attack": -0.322,
+   "defence": -0.28
   },
   {
    "team": "Fulham",
-   "attack": -0.331,
-   "defence": 0.048
+   "attack": -0.337,
+   "defence": 0.045
   },
   {
    "team": "Hull",
-   "attack": -0.384,
-   "defence": 0.115
+   "attack": -0.391,
+   "defence": 0.11
   },
   {
    "team": "Sunderland",
-   "attack": -0.41,
-   "defence": -0.063
+   "attack": -0.416,
+   "defence": -0.067
   },
   {
    "team": "Burnley",
-   "attack": -0.419,
-   "defence": -0.378
+   "attack": -0.425,
+   "defence": -0.382
   },
   {
    "team": "Sheffield United",
-   "attack": -0.504,
-   "defence": -0.718
+   "attack": -0.514,
+   "defence": -0.72
   },
   {
    "team": "Wolves",
-   "attack": -0.553,
-   "defence": -0.248
+   "attack": -0.56,
+   "defence": -0.253
   },
   {
    "team": "Leicester",
-   "attack": -0.667,
-   "defence": -0.424
+   "attack": -0.672,
+   "defence": -0.427
   },
   {
    "team": "Southampton",
-   "attack": -0.836,
-   "defence": -0.519
+   "attack": -0.837,
+   "defence": -0.52
   }
  ]
 }
